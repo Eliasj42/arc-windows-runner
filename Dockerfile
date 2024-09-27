@@ -50,7 +50,16 @@ RUN `
   #   Docker CLI available on your images.
   ###############################################################################################
   choco install docker-cli docker-compose -force;
-  Invoke-WebRequest  -UseBasicParsing -Uri 'https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe' -OutFile 'c:/veera/python-3.10.0-amd64.exe';
-  .\python-3.10.0-amd64.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0;
-  setx /M path "%path%;C:\Program Files\Python310\"; 
-  $env:PATH =$env:PATH+";C:\Program Files\Python310\";
+# Set environment variables to suppress prompts during installation
+ENV PYTHON_VERSION=3.10.9 \
+    PYTHON_HOME="C:\\Python310" \
+    PATH="${PATH};C:\\Python310;C:\\Python310\\Scripts"
+
+# Download and install Python 3.10
+RUN powershell -Command `
+    Invoke-WebRequest -Uri https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-amd64.exe -OutFile C:\\python-installer.exe; `
+    Start-Process -Wait -FilePath C:\\python-installer.exe -ArgumentList /quiet InstallAllUsers=1 PrependPath=1; `
+    Remove-Item C:\\python-installer.exe
+
+# Verify Python installation
+RUN python --version
