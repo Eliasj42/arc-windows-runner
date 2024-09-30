@@ -52,3 +52,18 @@ RUN `
   choco install docker-cli docker-compose -force;
 
 RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+
+# Use a Windows base image
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
+
+# Download Cygwin installer
+ADD https://cygwin.com/setup-x86_64.exe cygwin-installer.exe
+
+# Install Cygwin with Bash
+RUN cygwin-installer.exe -q -P bash
+
+# Cleanup
+RUN del cygwin-installer.exe
+
+# Set Bash as the default shell
+CMD ["C:\\cygwin64\\bin\\bash.exe"]
