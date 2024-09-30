@@ -65,8 +65,5 @@ RUN .\cygwin-installer.exe -q -R C:\cygwin64 -P bash -l C:\cygwin64\packages --n
 # Set the PATH environment variable at build time
 ENV PATH="C:/cygwin64/bin:${PATH}"
 
-# Cleanup installer
-RUN del cygwin-installer.exe
-
 # Set Bash as the default shell
 CMD ["C:\\cygwin64\\bin\\bash.exe"]
