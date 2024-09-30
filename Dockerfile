@@ -51,3 +51,4 @@ RUN `
   ###############################################################################################
   choco install docker-cli docker-compose -force;
 
+RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
