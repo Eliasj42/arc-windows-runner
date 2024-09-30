@@ -60,11 +60,10 @@ WORKDIR /cygwin-install
 ADD https://cygwin.com/setup-x86_64.exe cygwin-installer.exe
 
 # Run the Cygwin installer to install Bash
-# Note: Using --no-admin flag to avoid permissions issues
 RUN .\cygwin-installer.exe -q -R C:\cygwin64 -P bash -l C:\cygwin64\packages --no-admin
 
-# Add Cygwin to the system path
-RUN setx /M PATH "%PATH%;C:\cygwin64\bin"
+# Set the PATH environment variable at build time
+ENV PATH="C:/cygwin64/bin:${PATH}"
 
 # Cleanup installer
 RUN del cygwin-installer.exe
