@@ -53,16 +53,20 @@ RUN `
 
 RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
 
-# Use a Windows base image
-FROM mcr.microsoft.com/windows/servercore:ltsc2022
+# Set a valid working directory
+WORKDIR /cygwin-install
 
 # Download Cygwin installer
 ADD https://cygwin.com/setup-x86_64.exe cygwin-installer.exe
 
-# Install Cygwin with Bash
-RUN cygwin-installer.exe -q -P bash
+# Run the Cygwin installer to install Bash
+# Note: Using --no-admin flag to avoid permissions issues
+RUN .\cygwin-installer.exe -q -R C:\cygwin64 -P bash -l C:\cygwin64\packages --no-admin
 
-# Cleanup
+# Add Cygwin to the system path
+RUN setx /M PATH "%PATH%;C:\cygwin64\bin"
+
+# Cleanup installer
 RUN del cygwin-installer.exe
 
 # Set Bash as the default shell
