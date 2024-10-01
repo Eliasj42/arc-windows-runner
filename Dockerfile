@@ -24,10 +24,20 @@ RUN Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v
     Remove-Item -Path actions-runner.zip -Force
 
 # Install Git Bash
-RUN choco install git -y
+RUN choco install git.install -y
+RUN choco feature enable -n allowGlobalConfirmation
 
 # Set Git Bash as the default shell
-SHELL ["C:\\Program Files\\Git\\bin\\bash.exe", "-c"]
+SHELL ["bash", "-c"]
+
+RUN bash --version
+
+
+
+# Now all following RUN commands will be executed using Bash
+# Download vswhere.exe and move to a directory
+RUN curl -L -o vswhere.exe "https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe" && \
+    mv vswhere.exe "/Program Files/vswhere.exe"
 
 # Set up your runner, and use Bash
 RUN curl -L -o actions-runner.tar.gz https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-${RUNNER_OS}-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz && \
