@@ -5,11 +5,12 @@ ARG RUNNER_ARCH=x64
 ARG RUNNER_VERSION
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.6.1
 
-# Install Git Bash to use Bash commands
-RUN powershell.exe -Command \
-    Set-ExecutionPolicy Bypass -Scope Process -Force; \
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; \
-    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')); \
+# Install Git Bash and Chocolatey using PowerShell
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+RUN Set-ExecutionPolicy Bypass -Scope Process -Force; `
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
+    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')); `
     choco install git -y
 
 # Switch to bash for the rest of the build process
