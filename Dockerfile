@@ -83,4 +83,12 @@ RUN Remove-Item -Force vs_buildtools.exe
 
 RUN vswhere -latest -products * -property installationPath
 
+SHELL ["cmd", "/C"]
+
+RUN setx /M PATH "%PATH%;C:/BuildTools"
+
+RUN echo $Env:PATH
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
+
 CMD ["cmd.exe"]
