@@ -10,6 +10,10 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPrefe
 
 WORKDIR /home/runner
 
+RUN setx /M PATH "%PATH%;/home/runner"
+
+RUN echo $Env:PATH
+
 RUN `
   ###############################################################################################
   #   Install Actions Runner
