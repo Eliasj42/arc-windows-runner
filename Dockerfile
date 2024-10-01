@@ -52,24 +52,3 @@ RUN `
   choco install docker-cli docker-compose -force;
 
 RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
-
-# Set a valid working directory
-WORKDIR /cygwin-install
-
-# Download Cygwin installer
-ADD https://cygwin.com/setup-x86_64.exe cygwin-installer.exe
-
-# Run the Cygwin installer to install Bash
-RUN .\cygwin-installer.exe -q -R C:\cygwin64 -P bash -l C:\cygwin64\packages --no-admin
-
-# Set the PATH environment variable at build time
-ENV PATH="C:/cygwin64/bin:${PATH}"
-
-# Set Bash as the default shell
-CMD ["C:\\cygwin64\\bin\\bash.exe"]
-
-RUN choco install git.install -y
-
-RUN choco feature enable -n allowGlobalConfirmation
-
-RUN choco install docker-cli docker-compose -force
