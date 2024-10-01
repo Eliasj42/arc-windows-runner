@@ -81,4 +81,6 @@ RUN .\vs_buildtools.exe --quiet --wait --norestart --nocache --installPath "C:\B
 # Clean up
 RUN Remove-Item -Force vs_buildtools.exe
 
+RUN vswhere -latest -products * -property installationPath
+
 CMD ["cmd.exe"]
