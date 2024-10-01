@@ -57,8 +57,7 @@ RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSyste
 RUN Invoke-WebRequest -Uri "https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe" -OutFile "vswhere.exe" 
 
 # Add the current working directory (%CD%) to the system PATH
-RUN setx /M PATH "%PATH%;%CD%" && \
-    set "PATH=%PATH%;%CD%"
+RUN setx /M PATH "%PATH%;%CD%"
 
 # Ensure the updated PATH persists across layers
 ENV PATH $PATH:"%CD%"
