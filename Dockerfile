@@ -61,6 +61,3 @@ RUN setx /M PATH "$Env:PATH;$(Get-Location)"
 
 # Ensure the updated PATH persists across layers
 ENV PATH $Env:PATH;$(Get-Location)
-
-# Set the entrypoint to cmd.exe so you can run vswhere
-CMD ["cmd.exe"]
