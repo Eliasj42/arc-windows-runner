@@ -55,7 +55,7 @@ RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSyste
 
 # Download vswhere.exe from the official GitHub releases
 RUN Invoke-WebRequest -Uri "https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe" -OutFile "vswhere.exe" 
-RUN Move-Item -Path "vswhere.exe" -Destination 'C:\Program` Files\vswhere.exe'
+RUN Move-Item -Path "vswhere.exe" -Destination "C:\\Program Files\\vswhere.exe"
 
 # Add vswhere to PATH
 RUN setx /M PATH "%PATH%;C:\Program Files"
