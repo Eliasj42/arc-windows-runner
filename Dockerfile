@@ -1,57 +1,37 @@
 # escape=`
-
 FROM mcr.microsoft.com/windows/servercore:ltsc2022
 ARG RUNNER_OS=win
 ARG RUNNER_ARCH=x64
 ARG RUNNER_VERSION
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.6.1
 
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
+# Install Git Bash to use Bash commands
+RUN powershell.exe -Command \
+    Set-ExecutionPolicy Bypass -Scope Process -Force; \
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; \
+    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')); \
+    choco install git -y
+
+# Switch to bash for the rest of the build process
+SHELL ["bash", "-c"]
 
 WORKDIR /home/runner
 
-RUN `
-  ###############################################################################################
-  #   Install Actions Runner
-  #   You must always install the runner, and you want the latest version to avoid the restrictions
-  #   applied to out-of-date runners.
-  #   https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/autoscaling-with-self-hosted-runners#:~:text=Warning,-Any%20updates%20released
-  ###############################################################################################
-  Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v${env:RUNNER_VERSION}/actions-runner-${env:RUNNER_OS}-${env:RUNNER_ARCH}-${env:RUNNER_VERSION}.zip -OutFile actions-runner.zip;`
-  Add-Type -AssemblyName System.IO.Compression.FileSystem;`
-  [System.IO.Compression.ZipFile]::ExtractToDirectory('actions-runner.zip', $PWD);`
-  Remove-Item -Path actions-runner.zip -Force;`
-  ###############################################################################################
-  #   Install Runner Container Hooks
-  #   While it is possible to include these hooks, Windows runners can't use these today. 
-  #   GitHub documents that you must use Linux runners for Docker container actions, job containers,
-  #   or service containers.
-  #   See also https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idservices
-  #   and https://github.com/actions/runner/issues/904
-  ###############################################################################################
-  # Invoke-WebRequest -OutFile runner-container-hooks.zip -Uri https://github.com/actions/runner-container-hooks/releases/download/v${env:RUNNER_CONTAINER_HOOKS_VERSION}/actions-runner-hooks-k8s-${env:RUNNER_CONTAINER_HOOKS_VERSION}.zip;`
-  # [System.IO.Compression.ZipFile]::ExtractToDirectory('runner-container-hooks.zip', (Join-Path -Path $PWD -ChildPath 'k8s'));`
-  # Remove-Item -Path runner-container-hooks.zip -Force;`
-  ###############################################################################################
-  #   Install Git Using Choco
-  #   Runners should have access to the latest version of Git and Git LFS, which we can
-  #   install using Choco. This also makes a Bash shell available on Windows for scripting.
-  #   You may want to include other tools and script engines as well.
-  ###############################################################################################
-  Set-ExecutionPolicy Bypass -Scope Process -Force;`
-  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;`
-  Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'));`
-  choco install git.install -y;`
-  choco feature enable -n allowGlobalConfirmation;`
-  ###############################################################################################
-  #   Install Docker CLI Using Choco
-  #   It's important to know that Windows doesn't support nested containers, so you can't
-  #   use a Docker-in-Docker on Windows. That frequently limits the value of having the
-  #   Docker CLI available on your images.
-  ###############################################################################################
-  choco install docker-cli docker-compose -force;
+# Install Actions Runner
+RUN curl -L -o actions-runner.zip https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-${RUNNER_OS}-${RUNNER_ARCH}-${RUNNER_VERSION}.zip && \
+    unzip actions-runner.zip && \
+    rm actions-runner.zip
 
-RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+# Optional: Install Runner Container Hooks (commented out)
+# RUN curl -L -o runner-container-hooks.zip https://github.com/actions/runner-container-hooks/releases/download/v${RUNNER_CONTAINER_HOOKS_VERSION}/actions-runner-hooks-k8s-${RUNNER_CONTAINER_HOOKS_VERSION}.zip && \
+#     unzip runner-container-hooks.zip -d ./k8s && \
+#     rm runner-container-hooks.zip
+
+# Install Docker CLI using Chocolatey
+RUN choco install docker-cli docker-compose -y
+
+# Enable long paths
+RUN reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v "LongPathsEnabled" /t REG_DWORD /d 1 /f
 
 # Download vswhere.exe from the official GitHub releases
-RUN Invoke-WebRequest -Uri "https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe" -OutFile "vswhere.exe" 
+RUN curl -L -o vswhere.exe https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe
