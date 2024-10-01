@@ -29,11 +29,6 @@ RUN choco install git -y
 # Set Git Bash as the default shell
 SHELL ["C:\\Program Files\\Git\\bin\\bash.exe", "-c"]
 
-# Now all following RUN commands will be executed using Bash
-# Download vswhere.exe and move to a directory
-RUN curl -L -o vswhere.exe "https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe" && \
-    mv vswhere.exe "/Program Files/vswhere.exe"
-
 # Set up your runner, and use Bash
 RUN curl -L -o actions-runner.tar.gz https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-${RUNNER_OS}-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz && \
     tar -xzf actions-runner.tar.gz && \
