@@ -57,6 +57,6 @@ RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSyste
 RUN Invoke-WebRequest -Uri "https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe" -OutFile "vswhere.exe" 
 
 RUN .\vswhere.exe
-
+RUN vswhere
 # Set the entrypoint to cmd.exe so you can run vswhere
 CMD ["cmd.exe"]
