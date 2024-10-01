@@ -5,34 +5,36 @@ ARG RUNNER_ARCH=x64
 ARG RUNNER_VERSION
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.6.1
 
-# Install Git Bash and Chocolatey using PowerShell
+# Use PowerShell as the default shell for setup tasks
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
+WORKDIR C:/home/runner
+
+# Install Chocolatey to install Git (with Git Bash) and Docker CLI
 RUN Set-ExecutionPolicy Bypass -Scope Process -Force; `
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')); `
-    choco install git -y
+    choco install git -y; `
+    choco install docker-cli docker-compose -y
 
-# Switch to bash for the rest of the build process
-SHELL ["bash", "-c"]
+# Download and install Git Bash
+RUN Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v${env:RUNNER_VERSION}/actions-runner-${env:RUNNER_OS}-${env:RUNNER_ARCH}-${env:RUNNER_VERSION}.zip -OutFile actions-runner.zip; `
+    Add-Type -AssemblyName System.IO.Compression.FileSystem; `
+    [System.IO.Compression.ZipFile]::ExtractToDirectory('actions-runner.zip', $PWD); `
+    Remove-Item -Path actions-runner.zip -Force
 
-WORKDIR /home/runner
+# Install Git Bash
+RUN choco install git -y
 
-# Install Actions Runner
-RUN curl -L -o actions-runner.zip https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-${RUNNER_OS}-${RUNNER_ARCH}-${RUNNER_VERSION}.zip && \
-    unzip actions-runner.zip && \
-    rm actions-runner.zip
+# Set Git Bash as the default shell
+SHELL ["C:\\Program Files\\Git\\bin\\bash.exe", "-c"]
 
-# Optional: Install Runner Container Hooks (commented out)
-# RUN curl -L -o runner-container-hooks.zip https://github.com/actions/runner-container-hooks/releases/download/v${RUNNER_CONTAINER_HOOKS_VERSION}/actions-runner-hooks-k8s-${RUNNER_CONTAINER_HOOKS_VERSION}.zip && \
-#     unzip runner-container-hooks.zip -d ./k8s && \
-#     rm runner-container-hooks.zip
+# Now all following RUN commands will be executed using Bash
+# Download vswhere.exe and move to a directory
+RUN curl -L -o vswhere.exe "https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe" && \
+    mv vswhere.exe "/Program Files/vswhere.exe"
 
-# Install Docker CLI using Chocolatey
-RUN choco install docker-cli docker-compose -y
-
-# Enable long paths
-RUN reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v "LongPathsEnabled" /t REG_DWORD /d 1 /f
-
-# Download vswhere.exe from the official GitHub releases
-RUN curl -L -o vswhere.exe https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe
+# Set up your runner, and use Bash
+RUN curl -L -o actions-runner.tar.gz https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-${RUNNER_OS}-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz && \
+    tar -xzf actions-runner.tar.gz && \
+    rm actions-runner.tar.gz
