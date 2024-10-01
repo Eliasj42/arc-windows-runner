@@ -10,7 +10,7 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPrefe
 
 WORKDIR /home/runner
 
-RUN setx /M PATH "%PATH%;/home/runner"
+RUN setx /M PATH "%PATH%;C:/home/runner"
 
 RUN echo $Env:PATH
 
