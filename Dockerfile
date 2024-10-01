@@ -68,3 +68,17 @@ RUN .\vswhere.exe
 RUN vswhere
 # Set the entrypoint to cmd.exe so you can run vswhere
 CMD ["cmd.exe"]
+
+# Download the Visual Studio Build Tools installer
+RUN powershell -Command \
+    Invoke-WebRequest -Uri "https://aka.ms/vs/16/release/vs_buildtools.exe" -OutFile "vs_buildtools.exe"
+
+# Install the Build Tools with specific workloads (e.g., MSBuild tools, C++ build tools)
+RUN .\vs_buildtools.exe --quiet --wait --norestart --nocache --installPath "C:\BuildTools" `
+    --add Microsoft.VisualStudio.Workload.VCTools `
+    --add Microsoft.VisualStudio.Workload.ManagedDesktop `
+    --add Microsoft.VisualStudio.ComponentGroup.VisualStudioSDK `
+    --includeRecommended
+
+# Clean up
+RUN Remove-Item -Force vs_buildtools.exe
