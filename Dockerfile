@@ -67,7 +67,6 @@ RUN Invoke-WebRequest -Uri "https://github.com/microsoft/vswhere/releases/downlo
 RUN .\vswhere.exe
 RUN vswhere
 # Set the entrypoint to cmd.exe so you can run vswhere
-CMD ["cmd.exe"]
 
 # Download the Visual Studio Build Tools installer
 RUN powershell -Command \
@@ -82,3 +81,5 @@ RUN .\vs_buildtools.exe --quiet --wait --norestart --nocache --installPath "C:\B
 
 # Clean up
 RUN Remove-Item -Force vs_buildtools.exe
+
+CMD ["cmd.exe"]
