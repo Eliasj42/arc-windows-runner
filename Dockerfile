@@ -41,4 +41,4 @@ RUN Invoke-WebRequest -Uri "https://github.com/actions/runner/releases/download/
 #ADD scripts/start.ps1 .
 #ADD scripts/Cleanup-Runners.ps1 .
 #ENTRYPOINT ["pwsh.exe", ".\\start.ps1"]
-ENTRYPOINT ["pwsh.exe"]
+#ENTRYPOINT ["pwsh.exe"]
