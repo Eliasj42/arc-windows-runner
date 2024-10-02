@@ -37,6 +37,6 @@ RUN Invoke-WebRequest -Uri "https://github.com/actions/runner/releases/download/
     Expand-Archive -Path ".\\actions-runner.zip" -DestinationPath '.'
 
 #Add GitHub runner configuration startup script
-ADD scripts/start.ps1 .
-ADD scripts/Cleanup-Runners.ps1 .
+#ADD scripts/start.ps1 .
+#ADD scripts/Cleanup-Runners.ps1 .
 #ENTRYPOINT ["pwsh.exe", ".\\start.ps1"]
