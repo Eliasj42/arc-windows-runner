@@ -28,7 +28,7 @@ RUN `
   Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v${env:RUNNER_VERSION}/actions-runner-${env:RUNNER_OS}-${env:RUNNER_ARCH}-${env:RUNNER_VERSION}.zip -OutFile actions-runner.zip;`
   Add-Type -AssemblyName System.IO.Compression.FileSystem;`
   [System.IO.Compression.ZipFile]::ExtractToDirectory('actions-runner.zip', $PWD);`
-  Remove-Item -Path actions-runner.zip -Force
+  Remove-Item -Path actions-runner.zip -Force;`
   ###############################################################################################
   #   Install Runner Container Hooks
   #   While it is possible to include these hooks, Windows runners can't use these today. 
@@ -41,21 +41,58 @@ RUN `
   # [System.IO.Compression.ZipFile]::ExtractToDirectory('runner-container-hooks.zip', (Join-Path -Path $PWD -ChildPath 'k8s'));`
   # Remove-Item -Path runner-container-hooks.zip -Force;`
   ###############################################################################################
+  #   Install Git Using Choco
+  #   Runners should have access to the latest version of Git and Git LFS, which we can
+  #   install using Choco. This also makes a Bash shell available on Windows for scripting.
+  #   You may want to include other tools and script engines as well.
+  ###############################################################################################
+  Set-ExecutionPolicy Bypass -Scope Process -Force;`
+  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;`
+  Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'));`
+  choco install git.install -y;`
+  choco feature enable -n allowGlobalConfirmation;`
+  ###############################################################################################
+  #   Install Docker CLI Using Choco
+  #   It's important to know that Windows doesn't support nested containers, so you can't
+  #   use a Docker-in-Docker on Windows. That frequently limits the value of having the
+  #   Docker CLI available on your images.
+  ###############################################################################################
+  choco install docker-cli docker-compose -force;
 
-#Install chocolatey
-ADD scripts/Install-Choco.ps1 .
-RUN .\Install-Choco.ps1 -Wait
+RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
 
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
+# Download vswhere.exe from the official GitHub releases
+RUN Invoke-WebRequest -Uri "https://github.com/microsoft/vswhere/releases/download/2.8.4/vswhere.exe" -OutFile "vswhere.exe" 
 
-#Install Git, GitHub-CLI, Azure-CLI and PowerShell Core with Chocolatey (add more tooling if needed at build)
-RUN choco install -y git gh powershell-core azure-cli
+RUN .\vswhere.exe
+RUN vswhere
+# Set the entrypoint to cmd.exe so you can run vswhere
 
-#Download GitHub Runner based on RUNNER_VERSION argument (Can use: Docker build --build-arg RUNNER_VERSION=x.y.z)
-RUN Invoke-WebRequest -Uri "https://github.com/actions/runner/releases/download/v$env:RUNNER_VERSION/actions-runner-win-x64-$env:RUNNER_VERSION.zip" -OutFile "actions-runner.zip";`
-    Expand-Archive -Path ".\\actions-runner.zip" -DestinationPath '.'
+# Restore the default Windows shell for correct batch processing.
+SHELL ["cmd", "/S", "/C"]
 
-#Add GitHub runner configuration startup script
-#ADD scripts/start.ps1 .
-#ADD scripts/Cleanup-Runners.ps1 .
-#ENTRYPOINT ["pwsh.exe", ".\\start.ps1"]
+RUN `
+    # Download the Build Tools bootstrapper.
+    curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe `
+    `
+    # Install Build Tools with the Microsoft.VisualStudio.Workload.AzureBuildTools workload, excluding workloads and components with known issues.
+    && (start /w vs_buildtools.exe --quiet --wait --norestart --nocache `
+        --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools" `
+        --add Microsoft.VisualStudio.Workload.AzureBuildTools `
+        --remove Microsoft.VisualStudio.Component.Windows10SDK.10240 `
+        --remove Microsoft.VisualStudio.Component.Windows10SDK.10586 `
+        --remove Microsoft.VisualStudio.Component.Windows10SDK.14393 `
+        --remove Microsoft.VisualStudio.Component.Windows81SDK `
+        || IF "%ERRORLEVEL%"=="3010" EXIT 0) `
+    `
+    # Cleanup
+    && del /q vs_buildtools.exe
+
+# Define the entry point for the docker container.
+# This entry point starts the developer command prompt and launches the PowerShell shell.
+
+ENTRYPOINT ["C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\VsDevCmd.bat", "&&", "powershell.exe", "-NoLogo", "-ExecutionPolicy", "Bypass"]
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
+
+CMD ["cmd.exe"]
