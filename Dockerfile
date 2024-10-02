@@ -29,7 +29,6 @@ RUN .\Install-Choco.ps1 -Wait
 #Install Git, GitHub-CLI, Azure-CLI and PowerShell Core with Chocolatey (add more tooling if needed at build)
 RUN choco install -y \
     git \
-    gh \
     powershell-core \
     azure-cli
 
