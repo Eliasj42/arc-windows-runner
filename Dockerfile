@@ -23,5 +23,5 @@ ARG RUNNER_CONTAINER_HOOKS_VERSION=0.6.1
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
 
 #Set working directory
-WORKDIR /actions-runner
+WORKDIR /home/runner
 
