@@ -9,7 +9,7 @@
 #tag reference: https://mcr.microsoft.com/en-us/product/windows/servercore/insider/tags
 
 #Win10
-FROM mcr.microsoft.com/windows/servercore/insider:10.0.19035.1
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
 
 #Win11
 #FROM mcr.microsoft.com/windows/servercore/insider:10.0.26244.5000
