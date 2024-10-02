@@ -68,26 +68,29 @@ RUN .\vswhere.exe
 RUN vswhere
 # Set the entrypoint to cmd.exe so you can run vswhere
 
-# Download the Visual Studio Build Tools installer
-RUN Invoke-WebRequest -Uri "https://aka.ms/vs/16/release/vs_buildtools.exe" -OutFile "vs_buildtools.exe"
+# Restore the default Windows shell for correct batch processing.
+SHELL ["cmd", "/S", "/C"]
 
-# Install the Build Tools with specific workloads (e.g., MSBuild tools, C++ build tools)
-RUN .\vs_buildtools.exe --quiet --wait --norestart --nocache --installPath "C:\BuildTools" `
-    --add Microsoft.VisualStudio.Workload.VCTools `
-    --add Microsoft.VisualStudio.Workload.ManagedDesktop `
-    --add Microsoft.VisualStudio.ComponentGroup.VisualStudioSDK `
-    --includeRecommended
+RUN `
+    # Download the Build Tools bootstrapper.
+    curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe `
+    `
+    # Install Build Tools with the Microsoft.VisualStudio.Workload.AzureBuildTools workload, excluding workloads and components with known issues.
+    && (start /w vs_buildtools.exe --quiet --wait --norestart --nocache `
+        --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools" `
+        --add Microsoft.VisualStudio.Workload.AzureBuildTools `
+        --remove Microsoft.VisualStudio.Component.Windows10SDK.10240 `
+        --remove Microsoft.VisualStudio.Component.Windows10SDK.10586 `
+        --remove Microsoft.VisualStudio.Component.Windows10SDK.14393 `
+        --remove Microsoft.VisualStudio.Component.Windows81SDK `
+        || IF "%ERRORLEVEL%"=="3010" EXIT 0) `
+    `
+    # Cleanup
+    && del /q vs_buildtools.exe
 
-# Clean up
-RUN Remove-Item -Force vs_buildtools.exe
-
-RUN vswhere -latest -products * -property installationPath
-
-SHELL ["cmd", "/C"]
-
-RUN setx /M PATH "%PATH%;C:/BuildTools"
-
-RUN echo $Env:PATH
+# Define the entry point for the docker container.
+# This entry point starts the developer command prompt and launches the PowerShell shell.
+ENTRYPOINT ["C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\VsDevCmd.bat", "&&", "powershell.exe", "-NoLogo", "-ExecutionPolicy", "Bypass"]
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
 
