@@ -57,9 +57,9 @@ RUN `
   #   use a Docker-in-Docker on Windows. That frequently limits the value of having the
   #   Docker CLI available on your images.
   ###############################################################################################
-  choco install docker-cli docker-compose -force;`
-  choco install visualstudio2022community --package-parameters`
-   "--add Microsoft.VisualStudio.Workload.CoreEditor --add Microsoft.VisualStudio.Workload.ManagedDesktop" -y
+  choco install docker-cli docker-compose -force;
+  
+RUN choco install visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Workload.CoreEditor --add Microsoft.VisualStudio.Workload.ManagedDesktop" -y
 
 RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
 
