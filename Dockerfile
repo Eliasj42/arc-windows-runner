@@ -59,6 +59,8 @@ RUN `
   ###############################################################################################
   choco install docker-cli docker-compose -force;
 
+RUN choco install visualstudio2022buildtools -y 
+
 RUN choco install visualstudioinstaller -y
 
 RUN choco install visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Workload.CoreEditor --add Microsoft.VisualStudio.Workload.ManagedDesktop" -y
