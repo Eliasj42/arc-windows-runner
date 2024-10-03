@@ -59,10 +59,6 @@ RUN `
   ###############################################################################################
   choco install docker-cli docker-compose -force;
 
-RUN choco install visualstudio2022buildtools -y 
-
-RUN choco install visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Workload.CoreEditor --add Microsoft.VisualStudio.Workload.ManagedDesktop" -y
-
 RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
 
 # Download vswhere.exe from the official GitHub releases
