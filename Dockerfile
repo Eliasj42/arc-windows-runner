@@ -59,6 +59,9 @@ RUN `
   ###############################################################################################
   choco install docker-cli docker-compose -force;
 
+# Append Git\bin to $PATH so bash.exe can be used.
+RUN setx /M PATH $($Env:PATH + ';C:\Program Files\Git\bin')
+
 RUN New-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
 
 # Download vswhere.exe from the official GitHub releases
