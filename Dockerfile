@@ -98,8 +98,11 @@ RUN choco install cmake -y --no-progress --installargs '"ADD_CMAKE_TO_PATH=Syste
 RUN choco install python -y --no-progress
 RUN choco install visualstudio2022-workload-vctools -y --no-progress
 RUN python -m pip install setuptools
-RUN git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+RUN git clone https://github.com/microsoft/vcpkg.git C:\vcpkg `
+    && cd C:\vcpkg `
+    && bootstrap-vcpkg.bat `
+    && SETX /M PATH "C:\vcpkg;%PATH%" `
+    && vcpkg install zlib:x64-windows --clean-after-build `
+    && vcpkg remove zlib:x64-windows
 
 ENTRYPOINT ["C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat", "&&", "powershell.exe", "-NoLogo", "-ExecutionPolicy", "Bypass"]
-
-ENTRYPOINT ["C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\VsDevCmd.bat", "&&", "powershell.exe", "-NoLogo", "-ExecutionPolicy", "Bypass"]
