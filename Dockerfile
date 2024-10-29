@@ -101,7 +101,6 @@ RUN python -m pip install setuptools
 RUN git clone https://github.com/microsoft/vcpkg.git C:\vcpkg `
     && cd vcpkg `
     && bootstrap-vcpkg.bat `
-    && SETX /M PATH "C:\vcpkg;%PATH%" `
     && vcpkg install zlib:x64-windows --clean-after-build `
     && vcpkg remove zlib:x64-windows
 
