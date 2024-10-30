@@ -96,8 +96,7 @@ RUN `
 
 RUN choco install cmake -y --no-progress --installargs '"ADD_CMAKE_TO_PATH=System"'
 RUN choco install python -y --no-progress
-RUN choco install visualstudio2022-workload-vctools -y --no-progress
-RUN choco install visualstudio2022-buildtools --package-parameters "--add Microsoft.VisualStudio.Component.ATL --includeRecommended --includeOptional" -y
+RUN choco install visualstudio2022-workload-vctools "--add Microsoft.VisualStudio.Component.ATL" -y --no-progress
 RUN python -m pip install setuptools
 RUN git clone https://github.com/microsoft/vcpkg.git C:\vcpkg `
     && cd C:\vcpkg `
