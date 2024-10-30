@@ -98,6 +98,9 @@ RUN choco install cmake -y --no-progress --installargs '"ADD_CMAKE_TO_PATH=Syste
 RUN choco install python -y --no-progress
 RUN choco install visualstudio2022-workload-vctools "--add Microsoft.VisualStudio.Component.ATL" -y --no-progress
 RUN python -m pip install setuptools
+RUN choco install visualstudio2022buildtools -y
+RUN choco install visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Workload.CoreEditor --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.DesktopDevelopmentWithC++" -y
+RUN choco install visualstudio2022-workload-nativedesktop -y
 RUN git clone https://github.com/microsoft/vcpkg.git C:\vcpkg `
     && cd C:\vcpkg `
     && bootstrap-vcpkg.bat `
