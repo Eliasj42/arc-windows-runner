@@ -93,8 +93,6 @@ RUN `
 
 # Define the entry point for the docker container.
 # This entry point starts the developer command prompt and launches the PowerShell shell.
-
-RUN choco install sccache
 RUN choco install cmake -y --no-progress --installargs '"ADD_CMAKE_TO_PATH=System"'
 RUN choco install python -y --no-progress
 RUN choco install visualstudio2022-workload-vctools "--add Microsoft.VisualStudio.Component.ATL" -y --no-progress
