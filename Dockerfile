@@ -96,6 +96,8 @@ RUN `
 RUN choco install cmake -y --no-progress --installargs '"ADD_CMAKE_TO_PATH=System"'
 RUN choco install python -y --no-progress
 RUN choco install visualstudio2022-workload-vctools "--add Microsoft.VisualStudio.Component.ATL" -y --no-progress
+RUN python -m pip install --upgrade certifi
+RUN setx SSL_CERT_FILE "$(python -c 'import certifi; print(certifi.where())')"
 RUN python -m pip install setuptools
 RUN choco install visualstudio2022buildtools -y
 RUN choco install visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Workload.CoreEditor --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.DesktopDevelopmentWithC++" -y
