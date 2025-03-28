@@ -98,7 +98,7 @@ RUN choco install python -y --no-progress
 RUN python -m pip install --upgrade certifi
 RUN setx SSL_CERT_FILE "C:\Users\ContainerAdministrator\AppData\Local\Programs\Python\Python310\Lib\site-packages\certifi\cacert.pem"
 RUN certutil -generateSSTFromWU certs.sst
-RUN certutil -addstore -f ROOT certs.sst; \
+RUN certutil -addstore -f ROOT certs.sst
 RUN del certs.sst
 RUN choco install visualstudio2022-workload-vctools "--add Microsoft.VisualStudio.Component.ATL" -y --no-progress
 RUN python -m pip install setuptools
